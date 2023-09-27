@@ -8,6 +8,7 @@ class Model:
     def __init__(self, model, dataset):
         self.dataset = dataset
         self.model_name = model
+        self.box = True
         self.mask = None
         self.mask_p = None
         self.build()
@@ -23,8 +24,12 @@ class Model:
         self.model_name = model
         self.build()
     def predict(self,image, mask = None):
-        if "SAM" in self.model_name:
-            predict, mask =  sam.predict(self.model, image, mask)
+        if "SAM" in self.model_name and "BOX" in self.model_name:
+            print("BOX")
+            predict, mask =  sam.predict(self.model, image, mask, box = True)
+        elif "SAM" in self.model_name:
+            print("No BOX")
+            predict, mask =  sam.predict(self.model, image, mask, box = False)
         else:
             predict, mask = unet.predict(self.model, image,mask)
         self.mask_p = predict

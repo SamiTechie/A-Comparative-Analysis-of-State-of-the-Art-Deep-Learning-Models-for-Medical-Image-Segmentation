@@ -19,7 +19,6 @@ def get_bounding_box(ground_truth_map):
     This function creates varying bounding box coordinates based on the segmentation contours as prompt for the SAM model
     The padding is random int values between 5 and 20 pixels
     '''
-
     if len(np.unique(ground_truth_map)) > 1:
 
         # get bounding box from mask
@@ -65,7 +64,7 @@ def build_model(dataset, model):
     model.eval() 
     return model
 
-def preprocess(image, mask):
+def preprocess(image, mask, box):
     transform = Transforms(A.Compose([
         A.Resize(1024, 1024),
         ToTensorV2()
@@ -73,16 +72,18 @@ def preprocess(image, mask):
     example = transform(image,mask)
     image =  example['image'].float()
     mask =  example['mask']
-    prompt = get_bounding_box(mask.unsqueeze(0).numpy()[0])
+    prompt = [0,0, 1024, 1024]
+    if box is True:
+        prompt = get_bounding_box(mask.unsqueeze(0).numpy()[0])
     processor = SamProcessor.from_pretrained("facebook/sam-vit-base")
     input_  = processor(image, input_boxes=[[prompt]], return_tensors="pt")
     return input_['pixel_values'],input_['input_boxes'], mask
 
-def predict(model, image_path, mask_path):
+def predict(model, image_path, mask_path, box = False):
     with torch.no_grad():
         image = cv2.imread(image_path)
         mask = cv2.imread(mask_path,cv2.IMREAD_GRAYSCALE)
-        image, boxes,mask = preprocess(image,mask)
+        image, boxes,mask = preprocess(image,mask, box)
         mask_p = model(image, boxes)
         mask_p= torch.sigmoid(mask_p[0][0].unsqueeze(0)).detach().numpy().squeeze()
         mask_p = (mask_p > 0.5).astype(np.uint8) * 255
