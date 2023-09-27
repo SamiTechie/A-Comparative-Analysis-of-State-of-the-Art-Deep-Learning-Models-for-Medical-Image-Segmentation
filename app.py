@@ -5,7 +5,7 @@ import cv2
 import glob
 from models.model import Model
 #from evaluation import evaluation
-datasets = ["HRF","DR-HAGIS","OVRS","ISBI2016_ISIC", "IOSTAR","CHASEDB","KEVASIR-SEG"]
+datasets = ["HRF","DR-HAGIS","OVRS","ISBI2016_ISIC", "CHASEDB","KEVASIR-SEG"]
 models = ["UNET","SA-UNET", "ATT-UNET","SAM", "SAM-ZERO-SHOT"]
 
 
